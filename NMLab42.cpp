@@ -320,14 +320,17 @@ int main()
 	SNE Sys(in, pr);
 	bool flag = true;
 	out << setprecision(15);
+	out << (Sys.xk[0]) << " " << (Sys.xk[1]) << " " << sqrt(Sys.norm0) << " " << Sys.Bk << " " << Sys.iterations << endl;
+
 	while (flag)
 	{
-		Sys.JacobiV4();
+		Sys.JacobiV2();
 		try
 		{
-			out <<(Sys.xk[0]) << " " << (Sys.xk[1]) << " "<<sqrt(Sys.normF) << " " << Sys.Bk<< " "<< Sys.iterations << endl;
 			cout << setprecision(15) << Sys.Bk << endl;
 			flag = Sys.Step();
+			out << (Sys.xk[0]) << " " << (Sys.xk[1]) << " " << sqrt(Sys.normF) << " " << Sys.Bk << " " << Sys.iterations << endl;
+
 		}
 		catch (std::exception ex)
 		{
@@ -338,7 +341,8 @@ int main()
 				return -1;
 			}
 		}
-		out << Sys.Bk;
 	}
+	out << Sys.Bk;
+
 	_getch();
 }
