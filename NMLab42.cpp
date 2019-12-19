@@ -12,30 +12,30 @@ class functions
 public:
 	static double F1(vector<double> x)
 	{
-		return 0;
+		return x[0]*x[0]+x[1]*x[1]-1;
 	}
 
 	static double F2(vector<double> x)
 	{
-		return 0;
+		return (x[0]-2)* (x[0] - 2)+ (x[1] - 2)* (x[1] - 2)-4;
 	}
 
 	static double dF11(vector<double> x)
 	{
-
+		return 2*x[0];
 	}
 	static double dF12(vector<double> x)
 	{
-
+		return 2*x[1];
 	}
 
 	static double dF21(vector<double> x)
 	{
-
+		return 2*(x[0]-2);
 	}
 	static double dF22(vector<double> x)
 	{
-
+		return 2*(x[1]-2);
 	}
 
 	vector <function<double(vector<double>)>> F{F1,F2};
@@ -51,7 +51,7 @@ class SNE
 public:
 	int m, n;
 	functions F;
-	double e1, eps, norm0, normF ,Bk;
+	double e1, eps, norm0, normF ,Bk=1;
 	int maxIter,iterations;
 	vector<double> x0, xk,dxk,f0, f;
 	vector<vector<double>> A;
@@ -76,17 +76,17 @@ public:
 		vector<Func> sortedFuncs;
 		vector<vector<Func>> sortedDfs;
 		vector<double> values;
-		for (size_t i = 0; i < m; i++)
+		for (int i = 0; i < m; i++)
 		{
-			double tmp = F.F[i](xk);
+			double tmp = -F.F[i](xk);
 			bool pushed = false;
-			for (size_t j = 0; j < values.size; j++)
+			for (int j = 0; j < values.size(); j++)
 			{
 				if (abs(tmp) > abs(values[j]))
 				{
-					values.emplace(values.begin() + j, tmp);
-					sortedFuncs.emplace(sortedFuncs.begin() + j, F.F[i]);
-					sortedDfs.emplace(sortedDfs.begin() + j, F.dF[i]);
+					values.insert(values.begin() + j, tmp);
+					sortedFuncs.insert(sortedFuncs.begin() + j, F.F[i]);
+					sortedDfs.insert(sortedDfs.begin() + j, F.dF[i]);
 					pushed = true;
 					break;
 				}
@@ -99,6 +99,7 @@ public:
 			}
 		}
 		f = values;
+		normF = Norm(f);
 		F.dF = sortedDfs;
 		F.F = sortedFuncs;
 	}
@@ -129,7 +130,8 @@ public:
 			}
 		}
 		f = CalculateF(xk);
-		f = MultMTF(xk);
+		f = MultMTF(f);
+		normF = Norm(f);
 		A = Symetric();
 	}
 
@@ -160,7 +162,7 @@ public:
 			double sum = 0;
 			for (size_t i = 0; i < m; i++)
 			{
-				result[i] -= A[i][j] * x[j];
+				result[j] += A[i][j] * x[i];
 			}
 		}
 		return result;
@@ -186,11 +188,12 @@ public:
 
 			for (size_t j = i + 1; j < n; j++)
 			{
-				double mult = A[j][i] / A[i][i];
-				if (mult ==0)
+				if (A[i][i] == 0)
 				{
 					throw exception("BadMatrix");
 				}
+				double mult = A[j][i] / A[i][i];
+				
 				for (size_t k = i; k < n; k++)
 				{
 					if (k == i)
@@ -220,7 +223,7 @@ public:
 		vector<double> result(m);
 		for (size_t i = 0; i < m; i++)
 		{
-			result[i] = F.F[i](x);
+			result[i] = -F.F[i](x);
 		}
 		return result;
 	}
@@ -228,7 +231,7 @@ public:
 	double Norm(vector<double>& x)
 	{
 		double result = 0;
-		for (size_t i = 0; i < x.size; i++)
+		for (size_t i = 0; i < x.size(); i++)
 		{
 			result += x[i] * x[i];
 		}
@@ -273,17 +276,19 @@ public:
 			return false;
 		}
 
+
+
 		dxk = Gauss(f, n);
 		Bk = FindB();
 		if (Bk < e1)
 		{
 			return false;
 		}
-		dxk = Shift(Bk);
+		xk = Shift(Bk);
+		iterations++;
 		return true;
 	}
 
-	~SNE();
 private:
 
 };
@@ -297,19 +302,19 @@ int main()
 	bool flag = true;
 	while (flag)
 	{
-		Sys.JacobiV2();
-		try
-		{
+		Sys.JacobiV4();
+		/*try
+		{*/
 			flag = Sys.Step();
-		}
-		catch (const std::exception& ex)
-		{
-			string messege(ex.what);
-			if (messege == "BadMatrix")
-			{
-				cout << messege << endl;
-				return -1;
-			}
-		}
+		/*}*/
+		//catch (std::exception ex)
+		//{
+		//	/*string messege("BadMatrix");
+		//	if (messege == "BadMatrix")
+		//	{
+		//		cout << messege << endl;
+		//		return -1;
+		//	}*/
+		//}
 	}
 }
