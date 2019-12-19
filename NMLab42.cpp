@@ -3,6 +3,8 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
+#include <stdio.h>
 
 using namespace std;
 typedef function<double(vector<double>)> Func;
@@ -17,7 +19,7 @@ public:
 
 	static double F2(vector<double> x)
 	{
-		return (x[0]-2)* (x[0] - 2)+ (x[1] - 2)* (x[1] - 2)-4;
+		return (x[0]-2)* (x[0] - 2)+ (x[1])* (x[1])-1;
 	}
 
 	static double dF11(vector<double> x)
@@ -35,7 +37,7 @@ public:
 	}
 	static double dF22(vector<double> x)
 	{
-		return 2*(x[1]-2);
+		return 2*x[1];
 	}
 
 	vector <function<double(vector<double>)>> F{F1,F2};
@@ -300,21 +302,24 @@ int main()
 	pr.open("pr.txt");
 	SNE Sys(in, pr);
 	bool flag = true;
+	cout << scientific << setprecision(15);
 	while (flag)
 	{
 		Sys.JacobiV4();
-		/*try
-		{*/
+		try
+		{
+			cout << (Sys.xk[0]) << " " << (Sys.xk[1]) << sqrt(Sys.normF) << " " << Sys.Bk<< " "<< Sys.iterations << endl;
 			flag = Sys.Step();
-		/*}*/
-		//catch (std::exception ex)
-		//{
-		//	/*string messege("BadMatrix");
-		//	if (messege == "BadMatrix")
-		//	{
-		//		cout << messege << endl;
-		//		return -1;
-		//	}*/
-		//}
+		}
+		catch (std::exception ex)
+		{
+			string messege("BadMatrix");
+			if (messege == "BadMatrix")
+			{
+				cout << messege << endl;
+				return -1;
+			}
+		}
 	}
+	_getch();
 }
