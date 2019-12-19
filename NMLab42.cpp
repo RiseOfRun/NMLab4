@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <stdio.h>
+#include <conio.h>
 
 using namespace std;
 typedef function<double(vector<double>)> Func;
@@ -19,7 +20,12 @@ public:
 
 	static double F2(vector<double> x)
 	{
-		return (x[0]-2)* (x[0] - 2)+ (x[1])* (x[1])-1;
+		return (x[0]-2)* (x[0] - 2)+ (x[1])* (x[1])-2;
+	}
+
+	static double F3(vector<double> x)
+	{
+		return x[1]-x[0]/2.;
 	}
 
 	static double dF11(vector<double> x)
@@ -39,11 +45,20 @@ public:
 	{
 		return 2*x[1];
 	}
+	static double dF31(vector<double> x)
+	{
+		return -1./2.;
+	}
+	static double dF32(vector<double> x)
+	{
+		return 1;
+	}
 
-	vector <function<double(vector<double>)>> F{F1,F2};
+	vector <function<double(vector<double>)>> F{F1,F2,F3};
 	vector <vector<Func>> dF = vector<vector<Func>>{
 	vector<Func>{dF11, dF12},
-	vector<Func> {dF21, dF22}
+	vector<Func> {dF21, dF22},
+	vector<Func> {dF31, dF32}
 	};
 
 };
@@ -256,7 +271,7 @@ public:
 		vector<double> shifted = Shift(B);
 		vector<double> Fv = CalculateF(shifted);
 		double NormV = Norm(Fv);
-		while (NormV>norm0)
+		while (NormV>normF)
 		{
 			B = B / 2;
 			if (B<e1)
@@ -298,17 +313,20 @@ private:
 int main()
 {
 	ifstream in,pr;
+	ofstream out;
+	out.open("out.txt");
 	in.open("input.txt");
 	pr.open("pr.txt");
 	SNE Sys(in, pr);
 	bool flag = true;
-	cout << scientific << setprecision(15);
+	out << setprecision(15);
 	while (flag)
 	{
 		Sys.JacobiV4();
 		try
 		{
-			cout << (Sys.xk[0]) << " " << (Sys.xk[1]) << sqrt(Sys.normF) << " " << Sys.Bk<< " "<< Sys.iterations << endl;
+			out <<(Sys.xk[0]) << " " << (Sys.xk[1]) << " "<<sqrt(Sys.normF) << " " << Sys.Bk<< " "<< Sys.iterations << endl;
+			cout << setprecision(15) << Sys.Bk << endl;
 			flag = Sys.Step();
 		}
 		catch (std::exception ex)
@@ -320,6 +338,7 @@ int main()
 				return -1;
 			}
 		}
+		out << Sys.Bk;
 	}
 	_getch();
 }
